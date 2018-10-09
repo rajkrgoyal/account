@@ -21,16 +21,18 @@ class Invoice < ApplicationRecord
   def amount_owed
     invoice_total - total_amount_paid
   end
-  
+
   def total_amount_paid
     payments.sum(:amount)
   end
-  
-  # Accepts payment amounts (in dollars and cents) and payment method and 
+
+  # Accepts payment amounts (in dollars and cents) and payment method and
   # records that payment against the invoice
-  #def record_payment(amount_owed, payment_method)
-  #  payments.create({amount: (amount_owed * 100).to_i, raw_payment_method: payment_method})
-  #end
+  # def record_payment(amount_owed, payment_method)
+  #   payments.create(
+  #                   {amount: dollars_to_cents(amount_owed),
+  #                    raw_payment_method: payment_method})
+  # end
 
   # Accepts payment amounts (in dollars and cents) and payment method and
   # records that payment against the invoice
