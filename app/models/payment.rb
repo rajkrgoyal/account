@@ -7,20 +7,17 @@ class Payment < ApplicationRecord
 
   # Since external methods pass in a raw_payment_method, we need to set the ID
   # value for storing in the database
-  before_validation :set_payment_method_id
 
   belongs_to :invoice
 
-  attr_accessor :raw_payment_method
+  # Payment record in database must not be modified. it can only be created as
+  # another transaction if needed.
+  # valid_payment_method? should call before set_payment_method_id
+  before_validation :valid_payment_method?, :set_payment_method_id
 
   validates :amount, numericality: { only_integer: true, greater_than: 0 }
-
   validates :payment_method_id, presence: true
-
-  # Returns a symbol of the payment method based on the payment_method_id value
-  def payment_method
-    METHODS[payment_method_id]
-  end
+  attr_accessor :raw_payment_method
 
   # Set the payment_method_id value from the raw_payment_method.
   def set_payment_method_id

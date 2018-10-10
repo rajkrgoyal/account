@@ -6,7 +6,7 @@ class Invoice < ApplicationRecord
   # We expect invoices to be created in dollars as it's more comfortable for
   # humans to work with, so we need to translate the dollar amount to pennies
   # before we create the invoice
-  before_save :translate_invoice_total_to_cents
+  before_save :invoice_total_to_cents
 
   has_many :payments, dependent: :destroy
 
@@ -14,7 +14,7 @@ class Invoice < ApplicationRecord
 
   # Return true or false for whether the invoice has been paid
   def fully_paid?
-    amount_owed <= 0
+    amount_owed.zero? || amount_owed.negative?
   end
 
   # Return the remaining amount owed for the invoice in dolllars and cents
@@ -28,16 +28,10 @@ class Invoice < ApplicationRecord
 
   # Accepts payment amounts (in dollars and cents) and payment method and
   # records that payment against the invoice
-  # def record_payment(amount_owed, payment_method)
-  #   payments.create(
-  #                   {amount: dollars_to_cents(amount_owed),
-  #                    raw_payment_method: payment_method})
-  # end
-
-  # Accepts payment amounts (in dollars and cents) and payment method and
-  # records that payment against the invoice
-  def record_payment(amount_paid, payment_method)
-    payments.create(amount: dollars_to_cents(amount_paid),
+  # It should be called after paying by user, so no need to use round here.
+  # It must be with 2 decimal points, so multiply by 100 is sufficient.
+  def record_payment(amount, payment_method)
+    payments.create(amount: amount * 100,
                     raw_payment_method: payment_method)
   end
 
@@ -45,7 +39,7 @@ class Invoice < ApplicationRecord
 
   # Presumes that invoice_total was provided in dollars and translates to cents
   # before saving
-  def translate_invoice_total_to_cents
-    self.invoice_total = dollars_to_cents(invoice_total)
+  def invoice_total_to_cents
+    self.invoice_total = (invoice_total * 100).round
   end
 end
