@@ -6,15 +6,15 @@ class Invoice < ApplicationRecord
   # We expect invoices to be created in dollars as it's more comfortable for
   # humans to work with, so we need to translate the dollar amount to pennies
   # before we create the invoice
-  before_save :invoice_total_to_cents
+  before_validation :invoice_total_to_cents
 
   has_many :payments, dependent: :destroy
 
-  validates_numericality_of :invoice_total, greater_than: 0
+  validates :invoice_total, numericality: { greater_than: 0 }
 
   # Return true or false for whether the invoice has been paid
   def fully_paid?
-    amount_owed.zero? || amount_owed.negative?
+    amount_owed <= 0
   end
 
   # Return the remaining amount owed for the invoice in dolllars and cents
